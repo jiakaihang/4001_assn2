@@ -1,0 +1,42 @@
+Test 1
+=======
+Input: p
+Passed
+
+Input: p&q
+Passed
+
+Input: p | q
+Passed
+
+Input: ~p |~ q 
+Passed
+
+Input: p &~ q & r & s
+Passed
+
+Input: p => ~ q => r => ~s
+Passed
+
+Input: p => ~ q => r <= ~s
+Failed
+
+Input: p <= ~ q => r => ~s
+Failed
+
+Input: p <= q <=r <=> r => q => p
+Passed
+
+Input: (p <=> q) <=> r
+Passed
+
+Input: p <+> q <+> r <=> p <+> q <+> r
+Failed
+
+Input: (p <+> (q <+> r)) <=> ((p <+> q) <+> r)
+Passed
+
+Input: p_1 => p_2 => p_3 => p_4 => p_5 => p_6 => p_7 => p_8 => q_163
+Passed
+
+--------------- end of output ---------------

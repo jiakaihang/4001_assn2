@@ -1,0 +1,89 @@
+Test 1
+=======
+Input: p
+[1.2] parsed: p
+
+Input: p&q
+[1.4] parsed: (p&q)
+
+Input: p | q
+[1.6] parsed: (p|q)
+
+Input: ~p |~ q 
+[1.9] parsed: (~p|~q)
+
+Input: p &~ q & r & s
+[1.15] parsed: (((p&~q)&r)&s)
+
+Input: p => ~ q => r => ~s
+[1.20] parsed: (~p|(~~q|(~r|~s)))
+
+Input: p => ~ q => r <= ~s
+Failed
+
+Input: p <= ~ q => r => ~s
+Failed
+
+Input: p <= q <=r <=> r => q => p
+[1.27] parsed: ((((p|~q)|~r)&(~r|(~q|p)))|(~((p|~q)|~r)&~(~r|(~q|p))))
+
+Input: (p <=> q) <=> r
+[1.16] parsed: ((((p&q)|(~p&~q))&r)|(~((p&q)|(~p&~q))&~r))
+
+Input: p <+> q <+> r <=> p <+> q <+> r
+Failed
+
+Input: (p <+> (q <+> r)) <=> ((p <+> q) <+> r)
+[1.40] parsed: ((((p&~((q&~r)|(~q&r)))|(~p&((q&~r)|(~q&r))))&((((p&~q)|(~p&q))&~r)|(~((p&~q)|(~p&q))&r)))|(~((p&~((q&~r)|(~q&r)))|(~p&((q&~r)|(~q&r))))&~((((p&~q)|(~p&q))&~r)|(~((p&~q)|(~p&q))&r))))
+
+Test 2
+=======
+Input: p
+p
+[1.2] parsed: ()
+
+Input: p&q
+p  & q
+[1.4] parsed: ()
+
+Input: p | q
+p | q
+[1.6] parsed: ()
+
+Input: ~p |~ q 
+~p  | ~q
+[1.9] parsed: ()
+
+Input: p &~ q & r & s
+p  & ~q & r  & s
+[1.15] parsed: ()
+
+Input: p => ~ q => r => ~s
+~p  | q | ~r  | ~s
+[1.20] parsed: ()
+
+Input: p => ~ q => r <= ~s
+~p  | q | r
+Failed
+
+Input: p <= ~ q => r => ~s
+p | q
+Failed
+
+Input: p <= q <=r <=> r => q => p
+1
+[1.27] parsed: ()
+
+Input: (p <=> q) <=> r
+p == q == r
+[1.16] parsed: ()
+
+Input: p <+> q <+> r <=> p <+> q <+> r
+p == ~q
+Failed
+
+Input: (p <+> (q <+> r)) <=> ((p <+> q) <+> r)
+1
+[1.40] parsed: ()
+
+--------------- end of output ---------------

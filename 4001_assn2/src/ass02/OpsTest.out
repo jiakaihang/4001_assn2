@@ -1,0 +1,391 @@
+Test 1
+=======
+Testing evaluation of variable-free expressions
+eval (0) = false
+eval (1) = true
+
+eval (~0) = true
+eval (~1) = false
+
+eval ((0&0)) = false
+eval ((0&1)) = false
+eval ((1&0)) = false
+eval ((1&1)) = true
+
+eval ((0|0)) = false
+eval ((0|1)) = true
+eval ((1|0)) = true
+eval ((1|1)) = true
+
+eval ((0<=>0)) = true
+eval ((0<=>1)) = false
+eval ((1<=>0)) = false
+eval ((1<=>1)) = true
+
+eval ((0?0:0)) = false
+eval ((0?0:1)) = true
+eval ((0?1:0)) = false
+eval ((0?1:1)) = true
+eval ((1?0:0)) = false
+eval ((1?0:1)) = false
+eval ((1?1:0)) = true
+eval ((1?1:1)) = true
+
+eval (((1&0)|1)) = true
+eval (((1&0)|~1)) = false
+eval (((1&0)|~~(~(1&~0)|((1&~1)&1)))) = false
+
+Test 2
+=======
+Testing evaluation with bindings [P->true, Q->true, R->true, S->true, T->true]
+eval (P) = true
+eval (~P) = false
+eval ((P|Q)) = true
+eval ((Q|P)) = true
+eval (((~P|~Q)|R)) = true
+eval ((P&Q)) = true
+eval ((Q&P)) = true
+eval (((P&Q)&~R)) = false
+eval (((P&Q)|(Q&R))) = true
+eval (((Q&P)|(P&R))) = true
+eval (((((P&Q)&R)|((Q&R)&S))|((R&S)&T))) = true
+eval (((P|(P&Q))|((P&Q)&~R))) = true
+eval (((P|Q)&(P|R))) = true
+eval (((((~P|~Q)|R)&(~P|~Q))&~P)) = false
+eval (~~~((~((~P|~Q)|R)|~(~P|~Q))|~~P)) = false
+eval ((P?(Q?(R?1:0):(R<=>1)):(Q?(R?(S<=>0):(S<=>0)):1))) = true
+
+Testing evaluation with bindings [P->true, Q->true, R->false, S->true, T->false]
+eval (P) = true
+eval (~P) = false
+eval ((P|Q)) = true
+eval ((Q|P)) = true
+eval (((~P|~Q)|R)) = false
+eval ((P&Q)) = true
+eval ((Q&P)) = true
+eval (((P&Q)&~R)) = true
+eval (((P&Q)|(Q&R))) = true
+eval (((Q&P)|(P&R))) = true
+eval (((((P&Q)&R)|((Q&R)&S))|((R&S)&T))) = false
+eval (((P|(P&Q))|((P&Q)&~R))) = true
+eval (((P|Q)&(P|R))) = true
+eval (((((~P|~Q)|R)&(~P|~Q))&~P)) = false
+eval (~~~((~((~P|~Q)|R)|~(~P|~Q))|~~P)) = false
+eval ((P?(Q?(R?1:0):(R<=>1)):(Q?(R?(S<=>0):(S<=>0)):1))) = false
+
+Testing evaluation with bindings [P->true, Q->false, R->true, S->false, T->true]
+eval (P) = true
+eval (~P) = false
+eval ((P|Q)) = true
+eval ((Q|P)) = true
+eval (((~P|~Q)|R)) = true
+eval ((P&Q)) = false
+eval ((Q&P)) = false
+eval (((P&Q)&~R)) = false
+eval (((P&Q)|(Q&R))) = false
+eval (((Q&P)|(P&R))) = true
+eval (((((P&Q)&R)|((Q&R)&S))|((R&S)&T))) = false
+eval (((P|(P&Q))|((P&Q)&~R))) = true
+eval (((P|Q)&(P|R))) = true
+eval (((((~P|~Q)|R)&(~P|~Q))&~P)) = false
+eval (~~~((~((~P|~Q)|R)|~(~P|~Q))|~~P)) = false
+eval ((P?(Q?(R?1:0):(R<=>1)):(Q?(R?(S<=>0):(S<=>0)):1))) = true
+
+Testing evaluation with bindings [P->false, Q->false, R->true, S->false, T->true]
+eval (P) = false
+eval (~P) = true
+eval ((P|Q)) = false
+eval ((Q|P)) = false
+eval (((~P|~Q)|R)) = true
+eval ((P&Q)) = false
+eval ((Q&P)) = false
+eval (((P&Q)&~R)) = false
+eval (((P&Q)|(Q&R))) = false
+eval (((Q&P)|(P&R))) = false
+eval (((((P&Q)&R)|((Q&R)&S))|((R&S)&T))) = false
+eval (((P|(P&Q))|((P&Q)&~R))) = false
+eval (((P|Q)&(P|R))) = false
+eval (((((~P|~Q)|R)&(~P|~Q))&~P)) = true
+eval (~~~((~((~P|~Q)|R)|~(~P|~Q))|~~P)) = true
+eval ((P?(Q?(R?1:0):(R<=>1)):(Q?(R?(S<=>0):(S<=>0)):1))) = true
+
+Test 3
+=======
+Testing expression reduction
+reduce (((1&0)|1)) = 1
+reduce (((1&0)|~1)) = 0
+reduce (((1&0)|~~(~(1&~0)|((1&~1)&1)))) = 0
+
+Test 4
+=======
+Testing substitution of truth values
+
+Substituting P -> false
+substitute (P) = 0
+substitute (~P) = ~0
+substitute ((P|Q)) = (0|Q)
+substitute ((Q|P)) = (Q|0)
+substitute (((~P|~Q)|R)) = ((~0|~Q)|R)
+substitute ((P&Q)) = (0&Q)
+substitute ((Q&P)) = (Q&0)
+substitute (((P&Q)&~R)) = ((0&Q)&~R)
+substitute (((P&Q)|(Q&R))) = ((0&Q)|(Q&R))
+substitute (((Q&P)|(P&R))) = ((Q&0)|(0&R))
+substitute (((((P&Q)&R)|((Q&R)&S))|((R&S)&T))) = ((((0&Q)&R)|((Q&R)&S))|((R&S)&T))
+substitute (((P|(P&Q))|((P&Q)&~R))) = ((0|(0&Q))|((0&Q)&~R))
+substitute (((P|Q)&(P|R))) = ((0|Q)&(0|R))
+substitute (((((~P|~Q)|R)&(~P|~Q))&~P)) = ((((~0|~Q)|R)&(~0|~Q))&~0)
+substitute (~~~((~((~P|~Q)|R)|~(~P|~Q))|~~P)) = ~~~((~((~0|~Q)|R)|~(~0|~Q))|~~0)
+substitute ((P?(Q?(R?1:0):(R<=>1)):(Q?(R?(S<=>0):(S<=>0)):1))) = (0?(Q?(R?1:0):(R<=>1)):(Q?(R?(S<=>0):(S<=>0)):1))
+
+Substituting Q -> true
+substitute (P) = P
+substitute (~P) = ~P
+substitute ((P|Q)) = (P|1)
+substitute ((Q|P)) = (1|P)
+substitute (((~P|~Q)|R)) = ((~P|~1)|R)
+substitute ((P&Q)) = (P&1)
+substitute ((Q&P)) = (1&P)
+substitute (((P&Q)&~R)) = ((P&1)&~R)
+substitute (((P&Q)|(Q&R))) = ((P&1)|(1&R))
+substitute (((Q&P)|(P&R))) = ((1&P)|(P&R))
+substitute (((((P&Q)&R)|((Q&R)&S))|((R&S)&T))) = ((((P&1)&R)|((1&R)&S))|((R&S)&T))
+substitute (((P|(P&Q))|((P&Q)&~R))) = ((P|(P&1))|((P&1)&~R))
+substitute (((P|Q)&(P|R))) = ((P|1)&(P|R))
+substitute (((((~P|~Q)|R)&(~P|~Q))&~P)) = ((((~P|~1)|R)&(~P|~1))&~P)
+substitute (~~~((~((~P|~Q)|R)|~(~P|~Q))|~~P)) = ~~~((~((~P|~1)|R)|~(~P|~1))|~~P)
+substitute ((P?(Q?(R?1:0):(R<=>1)):(Q?(R?(S<=>0):(S<=>0)):1))) = (P?(1?(R?1:0):(R<=>1)):(1?(R?(S<=>0):(S<=>0)):1))
+
+Test 5
+=======
+Testing substitution of truth values
+
+Substituting P -> false
+substituteAndReduce (P) = 0
+substituteAndReduce (~P) = 1
+substituteAndReduce ((P|Q)) = Q
+substituteAndReduce ((Q|P)) = Q
+substituteAndReduce (((~P|~Q)|R)) = 1
+substituteAndReduce ((P&Q)) = 0
+substituteAndReduce ((Q&P)) = 0
+substituteAndReduce (((P&Q)&~R)) = 0
+substituteAndReduce (((P&Q)|(Q&R))) = (Q&R)
+substituteAndReduce (((Q&P)|(P&R))) = 0
+substituteAndReduce (((((P&Q)&R)|((Q&R)&S))|((R&S)&T))) = (((Q&R)&S)|((R&S)&T))
+substituteAndReduce (((P|(P&Q))|((P&Q)&~R))) = 0
+substituteAndReduce (((P|Q)&(P|R))) = (Q&R)
+substituteAndReduce (((((~P|~Q)|R)&(~P|~Q))&~P)) = 1
+substituteAndReduce (~~~((~((~P|~Q)|R)|~(~P|~Q))|~~P)) = 1
+substituteAndReduce ((P?(Q?(R?1:0):(R<=>1)):(Q?(R?(S<=>0):(S<=>0)):1))) = (~Q|(R?~S:~S))
+
+Substituting Q -> true
+substituteAndReduce (P) = P
+substituteAndReduce (~P) = ~P
+substituteAndReduce ((P|Q)) = 1
+substituteAndReduce ((Q|P)) = 1
+substituteAndReduce (((~P|~Q)|R)) = (~P|R)
+substituteAndReduce ((P&Q)) = P
+substituteAndReduce ((Q&P)) = P
+substituteAndReduce (((P&Q)&~R)) = (P&~R)
+substituteAndReduce (((P&Q)|(Q&R))) = (P|R)
+substituteAndReduce (((Q&P)|(P&R))) = (P|(P&R))
+substituteAndReduce (((((P&Q)&R)|((Q&R)&S))|((R&S)&T))) = (((P&R)|(R&S))|((R&S)&T))
+substituteAndReduce (((P|(P&Q))|((P&Q)&~R))) = ((P|P)|(P&~R))
+substituteAndReduce (((P|Q)&(P|R))) = (P|R)
+substituteAndReduce (((((~P|~Q)|R)&(~P|~Q))&~P)) = (((~P|R)&~P)&~P)
+substituteAndReduce (~~~((~((~P|~Q)|R)|~(~P|~Q))|~~P)) = ~~~((~(~P|R)|~~P)|~~P)
+substituteAndReduce ((P?(Q?(R?1:0):(R<=>1)):(Q?(R?(S<=>0):(S<=>0)):1))) = (P?R:(R?~S:~S))
+
+Test 6
+=======
+Testing free variables
+vars (((1&0)|1)) = List()
+vars (((1&0)|~1)) = List()
+vars (((1&0)|~~(~(1&~0)|((1&~1)&1)))) = List()
+vars (P) = List(P)
+vars (~P) = List(P)
+vars ((P|Q)) = List(P, Q)
+vars ((Q|P)) = List(P, Q)
+vars (((~P|~Q)|R)) = List(P, Q, R)
+vars ((P&Q)) = List(P, Q)
+vars ((Q&P)) = List(P, Q)
+vars (((P&Q)&~R)) = List(P, Q, R)
+vars (((P&Q)|(Q&R))) = List(P, Q, R)
+vars (((Q&P)|(P&R))) = List(P, Q, R)
+vars (((((P&Q)&R)|((Q&R)&S))|((R&S)&T))) = List(P, Q, R, S, T)
+vars (((P|(P&Q))|((P&Q)&~R))) = List(P, Q, R)
+vars (((P|Q)&(P|R))) = List(P, Q, R)
+vars (((((~P|~Q)|R)&(~P|~Q))&~P)) = List(P, Q, R)
+vars (~~~((~((~P|~Q)|R)|~(~P|~Q))|~~P)) = List(P, Q, R)
+vars ((P?(Q?(R?1:0):(R<=>1)):(Q?(R?(S<=>0):(S<=>0)):1))) = List(P, Q, R, S)
+
+Test 7
+=======
+Testing solve
+solve (((1&0)|1)) = Some(List([]))
+solve (((1&0)|~1)) = None
+solve (((1&0)|~~(~(1&~0)|((1&~1)&1)))) = None
+solve (P) = Some(List([P->true]))
+solve (~P) = Some(List([P->false]))
+solve ((P|Q)) = Some(List([P->false, Q->true], [P->true, Q->false], [P->true, Q->true]))
+solve ((Q|P)) = Some(List([P->false, Q->true], [P->true, Q->false], [P->true, Q->true]))
+solve (((~P|~Q)|R)) = Some(List([P->false, Q->false, R->false], [P->false, Q->false, R->true], [P->false, Q->true, R->false], [P->false, Q->true, R->true], [P->true, Q->false, R->false], [P->true, Q->false, R->true], [P->true, Q->true, R->true]))
+solve ((P&Q)) = Some(List([P->true, Q->true]))
+solve ((Q&P)) = Some(List([P->true, Q->true]))
+solve (((P&Q)&~R)) = Some(List([P->true, Q->true, R->false]))
+solve (((P&Q)|(Q&R))) = Some(List([P->false, Q->true, R->true], [P->true, Q->true, R->false], [P->true, Q->true, R->true]))
+solve (((Q&P)|(P&R))) = Some(List([P->true, Q->false, R->true], [P->true, Q->true, R->false], [P->true, Q->true, R->true]))
+solve (((((P&Q)&R)|((Q&R)&S))|((R&S)&T))) = Some(List([P->false, Q->false, R->true, S->true, T->true], [P->false, Q->true, R->true, S->true, T->false], [P->false, Q->true, R->true, S->true, T->true], [P->true, Q->false, R->true, S->true, T->true], [P->true, Q->true, R->true, S->false, T->false], [P->true, Q->true, R->true, S->false, T->true], [P->true, Q->true, R->true, S->true, T->false], [P->true, Q->true, R->true, S->true, T->true]))
+solve (((P|(P&Q))|((P&Q)&~R))) = Some(List([P->true, Q->false, R->false], [P->true, Q->false, R->true], [P->true, Q->true, R->false], [P->true, Q->true, R->true]))
+solve (((P|Q)&(P|R))) = Some(List([P->false, Q->true, R->true], [P->true, Q->false, R->false], [P->true, Q->false, R->true], [P->true, Q->true, R->false], [P->true, Q->true, R->true]))
+solve (((((~P|~Q)|R)&(~P|~Q))&~P)) = Some(List([P->false, Q->false, R->false], [P->false, Q->false, R->true], [P->false, Q->true, R->false], [P->false, Q->true, R->true]))
+solve (~~~((~((~P|~Q)|R)|~(~P|~Q))|~~P)) = Some(List([P->false, Q->false, R->false], [P->false, Q->false, R->true], [P->false, Q->true, R->false], [P->false, Q->true, R->true]))
+solve ((P?(Q?(R?1:0):(R<=>1)):(Q?(R?(S<=>0):(S<=>0)):1))) = Some(List([P->false, Q->false, R->false, S->false], [P->false, Q->false, R->false, S->true], [P->false, Q->false, R->true, S->false], [P->false, Q->false, R->true, S->true], [P->false, Q->true, R->false, S->false], [P->false, Q->true, R->true, S->false], [P->true, Q->false, R->true, S->false], [P->true, Q->false, R->true, S->true], [P->true, Q->true, R->true, S->false], [P->true, Q->true, R->true, S->true]))
+
+Test 8
+=======
+
+Testing OBDD construction
+Each expression "p" is converted to an OBDD using your definition of "obdd (varsList) (p)"
+and then converted back to an expression using provided definition of "obdd2Exp"
+
+The "varsList" is given in alphabetic order for all test cases except the last one
+
+
+obdd (((1&0)|1)) = 1
+obdd (((1&0)|~1)) = 0
+obdd (((1&0)|~~(~(1&~0)|((1&~1)&1)))) = 0
+obdd (P) = P
+obdd (~P) = ~P
+obdd ((P|Q)) = (P?1:Q)
+obdd ((Q|P)) = (P?1:Q)
+obdd (((~P|~Q)|R)) = (P?(Q?R:1):1)
+obdd ((P&Q)) = (P?Q:0)
+obdd ((Q&P)) = (P?Q:0)
+obdd (((P&Q)&~R)) = (P?(Q?~R:0):0)
+obdd (((P&Q)|(Q&R))) = (P?Q:(Q?R:0))
+obdd (((Q&P)|(P&R))) = (P?(Q?1:R):0)
+obdd (((((P&Q)&R)|((Q&R)&S))|((R&S)&T))) = (P?(Q?R:(R?(S?T:0):0)):(Q?(R?S:0):(R?(S?T:0):0)))
+obdd (((P|(P&Q))|((P&Q)&~R))) = P
+obdd (((P|Q)&(P|R))) = (P?1:(Q?R:0))
+obdd (((((~P|~Q)|R)&(~P|~Q))&~P)) = ~P
+obdd (~~~((~((~P|~Q)|R)|~(~P|~Q))|~~P)) = ~P
+obdd ((P?(Q?(R?1:0):(R<=>1)):(Q?(R?(S<=>0):(S<=>0)):1))) = (P?R:(Q?~S:1))
+obdd (((((P<=>Q)&(R<=>S))&(T<=>U))&(V<=>W))) = (P?(Q?(R?(S?(T?(U?(V<=>W):0):(U?0:(V<=>W))):0):(S?0:(T?(U?(V<=>W):0):(U?0:(V<=>W))))):0):(Q?0:(R?(S?(T?(U?(V<=>W):0):(U?0:(V<=>W))):0):(S?0:(T?(U?(V<=>W):0):(U?0:(V<=>W)))))))
+obdd (((((P<=>Q)&(R<=>S))&(T<=>U))&(V<=>W))) = (P?(T?(Q?(U?(R?(V?(S?W:0):(S?~W:0)):(V?(S?0:W):(S?0:~W))):0):0):(Q?(U?0:(R?(V?(S?W:0):(S?~W:0)):(V?(S?0:W):(S?0:~W)))):0)):(T?(Q?0:(U?(R?(V?(S?W:0):(S?~W:0)):(V?(S?0:W):(S?0:~W))):0)):(Q?0:(U?0:(R?(V?(S?W:0):(S?~W:0)):(V?(S?0:W):(S?0:~W)))))))
+
+Test 9
+=======
+
+Conversion to OBDD and pretty-print  for a given expression.
+Your "obdd" function is used for the conversion (as in the last test).
+The "prettyPrint" function is provided (do NOT change it!)
+
+The first occurrence of a "Conditional (name, node1, node2)" is displayed in block form as
+
+    name  => block form of node1
+             ...
+          :  block form of node2
+             ...
+
+When one of node1 or node2 is a FalseOBDD or TrueOBDD the (provided) prettyPrint
+displays without showing the False or True node, as one of the forms
+(treating inline operators as right associative):
+
+    ~name  & block form of node2
+    ~name  | block form of node2
+     name  & block form of node1
+     name  | block form of node1
+		
+The first occurrence of an "Definition (name, node)" is displayed in block form as
+		
+    name  == block form of node1
+		
+When an Conditional or Definition occurs more than once,
+the first occurrence is preceded by a numeric identifier	
+		
+    nn@name
+		
+and later occurrences of the same node are simply displayed as a node reference	
+		
+    [nn]
+
+
+exp = ((1&0)|1)
+obdd (exp) = 1
+
+exp = ((1&0)|~1)
+obdd (exp) = 0
+
+exp = ((1&0)|~~(~(1&~0)|((1&~1)&1)))
+obdd (exp) = 0
+
+exp = P
+obdd (exp) = P
+
+exp = ~P
+obdd (exp) = ~P
+
+exp = (P|Q)
+obdd (exp) = P | Q
+
+exp = (Q|P)
+obdd (exp) = P | Q
+
+exp = ((~P|~Q)|R)
+obdd (exp) = ~P  | ~Q  | R
+
+exp = (P&Q)
+obdd (exp) = P  & Q
+
+exp = (Q&P)
+obdd (exp) = P  & Q
+
+exp = ((P&Q)&~R)
+obdd (exp) = P  & Q  & ~R
+
+exp = ((P&Q)|(Q&R))
+obdd (exp) = P => Q
+               :  Q  & R
+
+exp = ((Q&P)|(P&R))
+obdd (exp) = P  & Q | R
+
+exp = ((((P&Q)&R)|((Q&R)&S))|((R&S)&T))
+obdd (exp) = P => Q => R
+                    :  1@R  & S  & T
+               :  Q => R  & S
+                    :  [1]
+
+exp = ((P|(P&Q))|((P&Q)&~R))
+obdd (exp) = P
+
+exp = ((P|Q)&(P|R))
+obdd (exp) = P | Q  & R
+
+exp = ((((~P|~Q)|R)&(~P|~Q))&~P)
+obdd (exp) = ~P
+
+exp = ~~~((~((~P|~Q)|R)|~(~P|~Q))|~~P)
+obdd (exp) = ~P
+
+exp = (P?(Q?(R?1:0):(R<=>1)):(Q?(R?(S<=>0):(S<=>0)):1))
+obdd (exp) = P => R
+               :  ~Q  | ~S
+
+exp = ((((P<=>Q)&(R<=>S))&(T<=>U))&(V<=>W))
+obdd (exp) = P => Q  & 1@R => S  & 2@T => U  & 3@V == W
+                                       :  ~U & [3]
+                           :  ~S & [2]
+               :  ~Q & [1]
+
+exp = ((((P<=>Q)&(R<=>S))&(T<=>U))&(V<=>W))
+obdd (exp) = P => T => Q  & 1@U  & 2@R => V => S  & W
+                                            :  S  & ~W
+                                       :  V => ~S & W
+                                            :  ~S & ~W
+                    :  Q  & 3@~U & [2]
+               :  T => ~Q & [1]
+                    :  ~Q & [3]
+
+--------------- end of output ---------------
