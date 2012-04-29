@@ -4,19 +4,6 @@ import Proposition.Name
 
 object Operations {
   
-//  trait prop2bool extends Visitor[Boolean]{
-//    def value = if(_) true else false
-//    def variable = binding(q)
-//    def not = !_
-//    def and = _&&_
-//    def or	= _||_
-//    def cond = if(_) _ else _
-//    def equiv = _==_
-//  }
-//  
-//  object prop2bool extends prop2bool
-  
-  
   def eval(binding: Name => Boolean): Proposition => Boolean = //{(p: Proposition) => prop2bool.visit(p)}
   {
 		  (p: Proposition) => p match{
@@ -30,71 +17,36 @@ object Operations {
 		    case Equivalent(r, s)	=> eval(binding)(r)==eval(binding)(s)
 		  }
   }
-  def prt(p: Proposition, r: Proposition, s: Proposition) = {println("\n{p = "+p+"\tr = "+r+"\ts = "+s+"}");}
-  def reduce: Proposition => Proposition = 
-  {
-    (p: Proposition) => p match{
-	  case False				=> False
-	  case True					=> True
-	  case Variable(q)			=> Variable(q)
-	  case Not(q)				=> if(q==True) False 
-	      							else if(q==False) True
-	      							else ~reduce(q)
-	  case And(r, s)			=> 	if(r==False || s==False) False
-	  								else if(r==True){
-	  								  if(s==True)True
-	  								  else if(s.isInstanceOf[Variable]) s
-	  								  else reduce(s)
-	  								}
-	  								else if(r.isInstanceOf[Variable]){
-	  								  if(s==True) r
-	  								  else if(s.isInstanceOf[Variable]) r&s
-	  								  else reduce(r&reduce(s))
-	  								}
-	  								else{
-	  								  if(s==True) reduce(r)
-	  								  else if(s.isInstanceOf[Variable]) reduce(reduce(r)&s)
-	  								  else reduce(reduce(r)&reduce(s))
-	  								}
-	  								
-//	    							if(r==False || s==False) False
-//	  	      						else if(r!=True && s==True) reduce(r)
-//	      							else if(r==True && s!=True) reduce(s)
-//	      							else if(r!=True && s!=True) reduce(r)&reduce(s)
-//	      							else True
-	  case Or(r, s)				=> 	if(r==True || s==True) True
-	  								else if(r==False){
-	  								  if(s==False)False
-	  								  else if(s.isInstanceOf[Variable]) s
-	  								  else reduce(s)
-	  								}
-	  								else if(r.isInstanceOf[Variable]){
-	  								  if(s==False) r
-	  								  else if(s.isInstanceOf[Variable]) r|s
-	  								  else reduce(r|reduce(s))
-	  								}
-	  								else{
-	  								  if(s==False) reduce(r)
-	  								  else if(s.isInstanceOf[Variable]) reduce(reduce(r)|s)
-	  								  else reduce(reduce(r)|reduce(s))
-	  								}
-//	    							if(r==True || s==True) True
-//	  	      						else if(r!=False && s==False) reduce(r)
-//	      							else if(r==False && s!=False) reduce(s)
-//	      							else if(r!=False && s!=False) reduce(r)|reduce(s)
-//	      							else False
-      case IfThenElse(r, s, t)	=> if(r==True) reduce(s)
-      								else if(r==False) reduce(t)
-      								else IfThenElse(reduce(r),reduce(s),reduce(t))
-      case Equivalent(r, s)		=> if((r==True && s==True)||(r==False && s==False)) True
-      								else if(r!=True && r!=False && s==True) reduce(r)
-      								else if(r==True && s!=True && s!=False) reduce(s)
-      								else if(r!=True && r!=False && s==False) reduce(~r)
-      								else if(r==False && s!=True && s!=False) reduce(~s)
-      								else if(r!=True && r!=False && s!=True && s!=False) reduce(r)<->reduce(s)
-      								else False
-    }
+  
+  trait reducer extends Identity{
+    override def not = {(p:Proposition) => 
+      					if(p==False) True else if(p==True) False else ~p}
+    override def and = {(p:Proposition, q:Proposition) => 	
+      					if(p==False||q==False) False
+    					else if(p==True&&q==True) True
+    					else if(p==True) q
+    					else if(q==True) p
+    					else p&q}
+    override def or = {(p:Proposition, q:Proposition) =>	
+      					if(p==True||q==True) True
+    					else if(p==False&&q==False) False
+    					else if(p==False) q
+    					else if(q==False) p
+    					else p|q}
+    override def cond = {(p:Proposition, q:Proposition, r:Proposition) =>
+      					if(p==True) q else if(p==False) r else IfThenElse(p,q,r)}
+    override def equiv= {(p:Proposition, q:Proposition) => 
+      					if((p==True && q==True)||(p==False && q==False)) True
+      					else if((p==True && q==False)||(p==False && q==True)) False
+      					else if(p==True) q
+      					else if(p==False) ~q
+      					else if(q==True) p
+      					else if(q==False) ~p
+      					else p<->q}
   }
+  object reducer extends reducer
+  def reduce: Proposition => Proposition = reducer.visit(_)
+
 
   def substitute(name: Name, truthVal: Boolean): Proposition => Proposition =
   {
@@ -119,11 +71,53 @@ object Operations {
 
   type Names = SortedSet[Name]
   val Names = SortedSet[Name] _
-  def vars: Proposition => Names =
-    error("TODO")
+  def vars: Proposition => Names ={
+    (p: Proposition) => p match{
+      		case True				=> Names()
+      		case False				=> Names()
+		    case Variable(q)		=> Names(q)
+		    case And(r, s)			=> vars(r)++vars(s)
+		    case Or(r, s)			=> vars(r)++vars(s)
+		    case Not(q)				=> vars(q)
+		    case IfThenElse(r,s,t)	=> vars(r)++vars(s)++vars(t)
+		    case Equivalent(r, s)	=> vars(r)++vars(s)
+    }
+  }
   
+  def name2bool(name:Name, truthVal: Boolean): Name => Boolean = name match{
+    case _ =>name=>truthVal
+  }
+  
+  def cartesianProduct[T](xss: List[List[T]]): List[List[T]] = xss match { 
+    case Nil => List(Nil) 
+    case h :: t => for(xh <- h; xt <- cartesianProduct(t)) yield xh :: xt 
+  }
+  
+  
+  val vals = List(false,true)
+  	
   def solve(goal: Proposition): Option[List[Name => Boolean]] =
-    error("TODO")
+  {
+    val namesList:List[Name]=vars(goal).toList 
+    var list:List[Name => Boolean] = List()
+    if(namesList.size==0){
+      if(reduce(goal)==True) Some(List(namesList=>true))
+      else None
+    }
+    else{
+      val table:List[List[Boolean]] = cartesianProduct(namesList.map(_=>vals))			//compute the full truth table
+      var p:Proposition = goal
+      for(j<- 0 to table.size-1){
+    	  for(i<- 0 to namesList.size-1) {p = substitute(namesList(i),table(j)(i))(goal)}	//test the values from the truth table
+    	  if(reduce(p)==True) {
+    	    var ls:List[Name => Boolean] = List()
+    	    for(i<- 0 to namesList.size-1) ls = name2bool(namesList(i),table(j)(i))::ls
+    	    list = list ++ ls
+    	  }
+      }
+      Some(list)
+    }
+  }
   
   import OBDD._
 
